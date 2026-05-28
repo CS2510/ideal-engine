@@ -1,0 +1,110 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Polygon/Polygon Collisions</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+
+  <script>
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+
+        const polygonGameObject = this.instantiate(new GameObject("Polygon Game Object"), new Vector2(300, 300))
+        polygonGameObject.addComponent(new Polygon(), {
+          points: [
+            new Vector2(300, -200),
+            new Vector2(200, 200),
+            new Vector2(-200, 200),
+            new Vector2(-200, -200),
+            
+          ]
+        })
+        polygonGameObject.addComponent(new Collider())
+
+
+
+        const mouseFollower = this.instantiate(new GameObject("Mouse Follower Game Object"), new Vector2(0,0))
+        mouseFollower.addComponent(new MouseFollowerComponent())
+        mouseFollower.addComponent(new Polygon(), {points: [new Vector2(-50, -50), new Vector2(-50, 50), new Vector2(50, 50), new Vector2(50, -50)], fillStyle: "transparent", strokeStyle: "blue"})
+        mouseFollower.addComponent(new Collider())
+
+        const ghostFollower = this.instantiate(new GameObject("Ghost Follower Game Object"), new Vector2(0, 0))
+        ghostFollower.addComponent(new Polygon(), {points: [new Vector2(-50, -50), new Vector2(-50, 50), new Vector2(50, 50), new Vector2(50, -50)], fillStyle: "transparent", strokeStyle: "green"})
+        ghostFollower.addComponent(new Collider())
+
+      }
+      
+    }
+
+    class MouseFollowerComponent extends Component {
+      start
+      end
+      update() {
+        if (Input.mousePosition) {
+          this.start = Input.mousePosition.clone()
+          this.transform.position = Input.mousePosition.clone()
+          delete this.end
+
+          const polygon = GameObject.find("Polygon Game Object")
+          const ghostFollower = GameObject.find("Ghost Follower Game Object")
+          const result = Collisions.isCollisionGameObjectGameObject(this.gameObject, polygon)
+          if (result) {
+            this.end = this.start.add(result)
+            ghostFollower.transform.position = this.end.clone()
+          }
+
+        }
+
+      }
+      draw(ctx) {
+        if (this.start && this.end) {
+          ctx.strokeStyle = "red"
+          ctx.lineWidth = 5
+          ctx.beginPath()
+          ctx.moveTo(this.start.x, this.start.y)
+          ctx.lineTo(this.end.x, this.end.y)
+          ctx.stroke()
+
+        }
+
+      }
+    }
+
+
+
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>

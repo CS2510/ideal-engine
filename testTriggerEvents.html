@@ -1,0 +1,186 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Trigger Events</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+
+
+
+  <script>
+    const square = [new Vector2(-50, -50), new Vector2(-50, 50), new Vector2(50, 50), new Vector2(50, -50)]
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+
+
+        // const steady = this.instantiate(new GameObject("Steady Game Object"), new Vector2(200, 200))
+        // steady.addComponent(new Polygon(), {points: square})
+        // steady.addComponent(new Collider(), {isTrigger: true})
+
+        // const moving = this.instantiate(new GameObject("Moving Game Object"), new Vector2(0, 200))
+        // moving.addComponent(new Polygon(), {points: square, fillStyle: "blue"})
+        // moving.addComponent(new Collider(), {isTrigger: false})
+        // moving.addComponent(new RigidBody(), {velocity:new Vector2(100, 0)})
+        // moving.addComponent(new Responder())
+
+
+        this.instantiate(new GameObject("Controller Game Object")).addComponent(new Controller())
+      }
+    }
+
+    class Controller extends Component {
+      start() {
+        const gameObjects = [A, B, C, D, E]
+        for (let i = 0; i < gameObjects.length; i++) {
+          const y = i * 150 + 150
+          for (let j = 0; j < gameObjects.length; j++) {
+            const added = instantiate(new gameObjects[j](), new Vector2(j * 225 + 450, y))
+            added.addComponent(new Responder)
+            if (i == 0)
+              instantiate(new GameObject("Text"), new Vector2(j * 225 + 450 - 50, 835)).addComponent(new TextLabel(), { text: added.name })
+          }
+          const mover = instantiate(new gameObjects[i](), new Vector2(150, y + 15))
+          mover.addComponent(new Mover())
+          mover.addComponent(new TextLabel(), { text: mover.name })
+
+        }
+      }
+      update() {
+        if (Input.keysUpThisFrame.includes("Space")) {
+          Globals.move = !Globals.move
+        }
+      }
+    }
+
+    class A extends GameObject {
+      constructor() {
+        super("No Collider")
+        this.addComponent(new Polygon(), { points: square, fillStyle: "aqua" })
+        this.addComponent(new TextLabel())
+      }
+    }
+
+    class B extends GameObject {
+      constructor() {
+        super("No Trigger, No RB")
+        this.addComponent(new Polygon(), { points: square, fillStyle: "brown" })
+        this.addComponent(new Collider(), { isTrigger: false })
+        this.addComponent(new TextLabel())
+      }
+    }
+
+    class C extends GameObject {
+      constructor() {
+        super("Trigger, No RB")
+        this.addComponent(new Polygon(), { points: square, fillStyle: "crimson" })
+        this.addComponent(new Collider(), { isTrigger: true })
+        this.addComponent(new TextLabel())
+      }
+    }
+
+    class D extends GameObject {
+      constructor() {
+        super("No Trigger, RB")
+        this.addComponent(new Polygon(), { points: square, fillStyle: "darksalmon" })
+        this.addComponent(new Collider(), { isTrigger: false })
+        this.addComponent(new RigidBody())
+        this.addComponent(new TextLabel())
+      }
+    }
+
+    class E extends GameObject {
+      constructor() {
+        super("Trigger, RB")
+        this.addComponent(new Polygon(), { points: square, fillStyle: "green" })
+        this.addComponent(new Collider(), { isTrigger: true })
+        this.addComponent(new RigidBody())
+        this.addComponent(new TextLabel())
+      }
+    }
+
+    class Globals {
+      static move = true
+    }
+
+    class Responder extends Component {
+      start() {
+        this.say("")
+      }
+      onTriggerEnter() {
+        this.say("On Trigger Enter")
+      }
+      onTriggerStay() {
+        this.say("On Trigger Stay")
+      }
+      onTriggerExit() {
+        this.say("On Trigger Exit")
+      }
+      onCollisionEnter() {
+        this.say("On Collision Enter")
+      }
+      onCollisionStay() {
+        this.say("On Collision Stay")
+      }
+      onCollisionExit() {
+        this.say("On Collision Exit")
+      }
+      say(string) {
+        this.gameObject.getComponent(TextLabel).text = string
+      }
+    }
+
+    class Mover extends Component {
+      speed = 100
+      start() {
+        const polygon = this.gameObject.getComponent(Polygon)
+        polygon.strokeStyle = polygon.fillStyle
+        polygon.lineWidth = 5
+        polygon.fillStyle = "transparent"
+
+        this.gameObject.getComponent(TextLabel).text = ""
+
+      }
+      update() {
+        if (Globals.move)
+          this.transform.position = this.transform.position.add(new Vector2(this.speed, 0).times(Time.deltaTime))
+      }
+    }
+
+
+
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>
