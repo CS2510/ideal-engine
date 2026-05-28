@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Game Top Down</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+
+
+
+
+
+  <script>
+
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+        this.instantiate(new HorizontalWallGameObject(), new Vector2(200, 200))
+        this.instantiate(new HorizontalWallGameObject(), new Vector2(400, 200))
+
+        this.instantiate(new HorizontalWallGameObject(), new Vector2(200, 600))
+
+
+        this.instantiate(new VerticalWallGameObject(), new Vector2(100, 300))
+        this.instantiate(new VerticalWallGameObject(), new Vector2(100, 500))
+
+        this.instantiate(new VerticalWallGameObject(), new Vector2(500, 300))
+        this.instantiate(new VerticalWallGameObject(), new Vector2(500, 500))
+
+        this.instantiate(new HeroGameObject(), new Vector2(400, 300))
+
+      }
+    }
+
+    class HorizontalWallGameObject extends GameObject {
+      constructor() {
+        super("HorizontalWallGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-100, -10), new Vector2(100, -10), new Vector2(100, 10), new Vector2(-100, 10)] })
+      }
+    }
+
+    class VerticalWallGameObject extends GameObject {
+      constructor() {
+        super("VerticalWallGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-10, -100), new Vector2(10, -100), new Vector2(10, 100), new Vector2(-10, 100)] })
+      }
+    }
+
+    class HeroGameObject extends GameObject {
+      constructor() {
+        super("HeroGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-10, -10), new Vector2(10, -10), new Vector2(10, 10), new Vector2(-10, 10)], fillStyle: "red" })
+      }
+    }
+
+    Engine.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>

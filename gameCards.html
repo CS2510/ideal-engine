@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Cards Game</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+
+
+
+
+
+  <script>
+
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+        this.instantiate(new CardGameObject(), new Vector2(200, 200))
+        this.instantiate(new CardGameObject(), new Vector2(250, 220))
+        this.instantiate(new CardGameObject(), new Vector2(300, 240))
+        this.instantiate(new CardGameObject(), new Vector2(350, 260))
+        
+
+      }
+    }
+
+    class CardGameObject extends GameObject {
+      constructor() {
+        super("CardGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-50, -70), new Vector2(50, -70), new Vector2(50, 70), new Vector2(-50, 70)], fillStyle: "grey", strokeStyle:"black", lineWidth:10 })
+      }
+    }
+
+    
+
+    Engine.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>

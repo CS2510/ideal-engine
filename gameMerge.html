@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Merge Game</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+
+  <script>
+    class MainScene extends Scene {
+      constructor() {
+        super()
+        this.instantiate(new BlockGameObject(), new Vector2(200, 200))
+
+
+
+      }
+    }
+
+    class BlockGameObject extends GameObject {
+      constructor() {
+        super("BlockGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-50, -50), new Vector2(50, -50), new Vector2(50, 50), new Vector2(-50, 50)], fillStyle: "#EEE4DA", strokeStyle: "black", lineWidth: 10 })
+        this.addComponent(new TextLabel(), { text: "2", fillStyle: "black", font: "40px arial" })
+      }
+    }
+
+    Engine.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>

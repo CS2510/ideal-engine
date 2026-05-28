@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Game Platform</title>
+    <style>
+        /* Engine-Specific */
+        * {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canv"></canvas>
+    <script src="./engine/Engine.js"></script>
+    <script src="./engine/Scene.js"></script>
+    <script src="./engine/GameObject.js"></script>
+    <script src="./engine/Component.js"></script>
+    <script src="./engine/Input.js"></script>
+    <script src="./engine/Vector2.js"></script>
+    <script src="./engine/Time.js"></script>
+    
+    <script src="./engine/components/Transform.js"></script>
+    <script src="./engine/components/TextLabel.js"></script>
+    <script src="./engine/components/Polygon.js"></script>
+
+
+    <script src="./gamePlatform/PlatformMainScene.js"></script>
+    <script src="./gamePlatform/PlatformGameObject.js"></script>
+    <script src="./gamePlatform/PlatformHeroGameObject.js"></script>
+
+
+    <script>
+        
+        Engine.currentScene = new PlatformMainScene()
+        Engine.start()
+    </script>
+</body>
+
+</html>
