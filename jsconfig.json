@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "checkJs": true,
+        "noImplicitAny": false,
+        "experimentalDecorators": true,
         "lib": [
             "esnext",
             "dom"
