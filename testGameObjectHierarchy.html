@@ -1,0 +1,118 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Game Object Hierarchy</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+
+
+
+  <script>
+    const square = [new Vector2(-50, -50), new Vector2(-50, 50), new Vector2(50, 50), new Vector2(50, -50)]
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+
+        const text = this.instantiate(new GameObject("Text"), new Vector2(100, 100))
+        text.addComponent(new TextLabel(), {text: "Level 1"})
+
+        const text2 = this.instantiate(new GameObject("Text2"), new Vector2(100, 100))
+        text2.addComponent(new TextLabel(), {text: "Sub Text"})
+        text2.transform.setParent(text.transform)
+        text.addComponent(new Level1Controller())
+
+        const parentPolygon = this.instantiate(new GameObject("Parent"), new Vector2(0, 0))
+        parentPolygon.transform.scale = new Vector2(1, 1)
+        parentPolygon.addComponent(new Polygon(), {points: square})
+        parentPolygon.addComponent(new KeyboardController())
+
+        const childPolygon = this.instantiate(new GameObject("Child"), new Vector2(250, 200))
+        childPolygon.addComponent(new Polygon(), {points: square, fillStyle: "blue", strokeStyle: "red"})
+        childPolygon.addComponent(new Collider())
+        childPolygon.addComponent(new RigidBody())
+        childPolygon.addComponent(new CollisionResponse())
+        childPolygon.transform.setParent(parentPolygon.transform)
+
+        const grandchildPolygon = this.instantiate(new GameObject("Grandchild"), new Vector2(-200, -200))
+        grandchildPolygon.addComponent(new Polygon, {points: square, fillStyle: "green"})
+        grandchildPolygon.addComponent(new Collider())
+        grandchildPolygon.addComponent(new RigidBody())
+        grandchildPolygon.addComponent(new CollisionResponse())
+        grandchildPolygon.transform.setParent(childPolygon.transform)
+
+
+        const targetPolygon = this.instantiate(new GameObject("Target"), new Vector2(400, 400))
+        targetPolygon.addComponent(new Polygon(), {points: square, fillStyle: "red"})
+        targetPolygon.addComponent(new Collider())
+      }
+    }
+
+   
+    class Level1Controller extends Component{
+      start(){
+        this.sceneStart = Time.time
+      }
+      update(){
+        
+      }
+    }
+
+    class CollisionResponse extends Component{
+      update(){
+        // this.transform.rotation += Time.deltaTime
+        this.transform.scale = new Vector2(10,1)
+      }
+      onCollisionEnter(){
+        console.log("Collision Enter")
+      }
+      onMouseOver(){
+        console.log("On Mouse Over")
+      }
+    }
+
+    class KeyboardController extends Component{
+      fixedUpdate(){
+        const offset = new Vector2(0,0)
+        if(Input.keysDown.includes("ArrowLeft")) offset.plusEquals(new Vector2(-1, 0))
+        if(Input.keysDown.includes("ArrowRight")) offset.plusEquals(new Vector2(1, 0))
+        if(Input.keysDown.includes("ArrowUp")) offset.plusEquals(new Vector2(0, -1))
+        if(Input.keysDown.includes("ArrowDown")) offset.plusEquals(new Vector2(0, 1))
+
+        this.transform.position.plusEquals(offset.times(100 * Time.deltaTime))
+      }
+    }
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>
