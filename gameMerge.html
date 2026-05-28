@@ -1,0 +1,263 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+<!doctype html>
+<html>
+
+<head>
+  <title>Merge Game</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+
+  <script>
+
+    /**
+     * The main scene in the game.
+     * Since everything will be added to the game procedurally,
+     * we just add a controller game obect
+     */
+    class MainScene extends Scene {
+      constructor() {
+        super()
+        this.instantiate(new ControllerGameObject())
+      }
+    }
+
+
+    class BlockGameObject extends GameObject {
+      constructor() {
+        super("Block Game Object")
+        this.addComponent(new Polygon(), { points: [new Vector2(-40, -40), new Vector2(40, -40), new Vector2(40, 40), new Vector2(-40, 40)], fillStyle: "#EEE4DA", strokeStyle: "black", lineWidth: 10 })
+        this.addComponent(new TextLabel(), { text: "2", fillStyle: "black", font: "40px arial" })
+        this.addComponent(new BlockController())
+      }
+    }
+
+    class BlockController extends Component {
+
+    }
+
+    class ControllerGameObject extends GameObject {
+      constructor() {
+        super("Controller Game Object")
+        this.addComponent(new Controller())
+      }
+    }
+
+    /**
+     * Convert from a blocks coordinates in board space, i.e. [0,3]x[0,3]
+     * to coordinates in pixel space
+     *
+     * @param {Vector3} The coordinate in board space, i.e.[0,3]x[0,3]
+     *
+     * @returns {Vector2} The coordinate in pixel space
+     */
+    function coordinatesToPixels(coords) {
+      return new Vector2(coords.x * 100 + 50 + 25, coords.y * 100 + 50 + 25)
+    }
+
+    /**
+     * Convert from a block's pixel location in its transform
+     * to coordinates in [0,3]x[0,3]
+     *
+     * @param {Vector2} The coordinate in pixel space
+     *
+     * @returns {Vector2} The coordinate in board space, i.e. [0,3]x[0,3]
+     */
+    function pixelsToCoordinates(pixels) {
+      return new Vector2((pixels.x - 25 - 50) / 100, (pixels.y - 25 - 50) / 100)
+    }
+
+    /**
+     * The main controller for the game
+     */
+    class Controller extends Component {
+      start() {
+        //Create the background tiles that create the board
+        for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+            instantiate(new BackgroundTileGameObject(), coordinatesToPixels(new Vector2(i, j)))
+          }
+        }
+
+        //Add the starting tile
+        instantiate(new BlockGameObject(), coordinatesToPixels(new Vector2(0, 0)))
+
+      }
+
+      update() {
+        let direction = new Vector2(0, 0)
+        if (Input.keysDownThisFrame.includes("ArrowLeft")) direction = new Vector2(-1, 0)
+        if (Input.keysDownThisFrame.includes("ArrowRight")) direction = new Vector2(1, 0)
+        if (Input.keysDownThisFrame.includes("ArrowUp")) direction = new Vector2(0, -1)
+        if (Input.keysDownThisFrame.includes("ArrowDown")) direction = new Vector2(0, 1)
+
+        //Check to see if any arrow keys were pushed
+        if (direction.magnitude === 0) return
+
+        //If we get here, then we know that the user pushed an arrow key
+
+        //The steps for movement are the following:
+        //1. Move the blocks, merging as we go
+        //2. Check to see if we can add an new block
+        //If we can, we add it
+        //If not, the game is over.
+
+        //Step 1 -- Move the blocks, merging as we go
+
+        //Get an array of all the block game objects in the scene
+        const blockGameObjects = Engine.currentScene.gameObjects.filter(go => go.name === "Block Game Object")
+
+        //Create a new array. This list is made of objects that have two variables.
+        //One is a reference to a block game object
+        //The second is the coordinate of that block in [0,3]x[0x3]
+        //We will "move" the blocks by changing their coordinate in this new array.
+        //Once all the blocks have been "moved", we will update their transform to reflect the new coordinate
+        let allBlocks = blockGameObjects.map(go => {
+          return { go, coordinates: pixelsToCoordinates(go.transform.position) }
+        })
+
+        //Clear data on the all the blocks
+        //Specifically, tell all blocks that they have not been merged this update
+        for (const block of allBlocks) {
+          block.go.getComponent(BlockController).mergedThisFrame = false
+        }
+
+        //Run code based on the direction the user pushed
+        //TODO: Change this so it is not direction-dependent
+        const xAxis = direction.x !== 0
+        const coord = xAxis ? "x" : "y"
+        const magnitude = xAxis ? direction.x : direction.y
+        const start = magnitude === 1 ? 2 : 1
+        const end = magnitude === 1 ? -1 : 4
+        //Loop from the bottom to the top
+        for (let a = start; a !== end; a += magnitude * -1) {
+          //Loop across each row
+          for (let b = 0; b < 4; b++) {
+            let x = xAxis ? a : b
+            let y = xAxis ? b : a
+
+            //Find a block (if any) at this given coordinate
+            const block = allBlocks.find(b => b.coordinates.x === x && b.coordinates.y === y)
+
+            //If there isn't a block at this location, then jus continue
+            if (!block) continue
+
+            //If we get here, then we have a block to move
+            //Try and move the block
+            while (block.coordinates[coord] + magnitude !== 4 && block.coordinates[coord] + magnitude !== -1) {
+              //Check to see if there is a block in the next position
+              const otherBlock = allBlocks.find(b => b.coordinates.x === x + direction.x && b.coordinates.y === block.coordinates.y + direction.y)
+
+              //If there isn't another block there, then we can just move the block
+              if (!otherBlock) {
+                block.coordinates[coord] += magnitude
+                continue
+              }
+
+              //If we get here, then there is a block in our way
+
+              //Get the number for the block we are moving
+              const thisBlockNumber = +block.go.getComponent(TextLabel).text
+              //Get the number for the block we ran into
+              const otherBlockNumber = +otherBlock.go.getComponent(TextLabel).text
+
+              if (thisBlockNumber !== otherBlockNumber) {
+                //If the blocks aren't the same number, then they can't merge.
+                //Stop moving
+                break
+              }
+
+              //If we get here, then the blocks have the same number
+              if (otherBlock.go.getComponent(BlockController).mergedThisFrame) {
+                //If the other block has already merged this move, they can't merge
+                //Stop moving.
+                break
+              }
+
+              //If we get here, the numbers can be merged
+
+              //Update the value of the other block and remove this block
+              //Then stop because the block can't move after its removed
+              const newBlockNumber = otherBlockNumber * 2
+              otherBlock.go.getComponent(TextLabel).text = "" + newBlockNumber
+              block.go.destroy()
+              allBlocks = allBlocks.filter(b => b !== block)
+              otherBlock.go.getComponent(BlockController).mergedThisFrame = true
+              break
+            }
+          }
+        }
+
+        //Now go through and reposition the blocks based on their final coordinate
+        for (const block of allBlocks) {
+          block.go.transform.position = coordinatesToPixels(block.coordinates)
+        }
+
+
+        //Step 2 -- Add a new block to the game
+
+        //Get a list of all open coordinates
+        //i.e., coordinates with blocks on them.
+        //This is the list of coordinates we will choose from
+        //when we add a new block
+        const openCoordinates = []
+        for (let x = 0; x < 4; x++) {
+          for (let y = 0; y < 4; y++) {
+            const possibleCoordinate = new Vector2(x, y)
+            if (!allBlocks.some(b => b.coordinates.x === possibleCoordinate.x && b.coordinates.y === possibleCoordinate.y)) {
+              openCoordinates.push(possibleCoordinate)
+            }
+          }
+        }
+
+        //If there is nowhere to place another block, the game is over
+        if (openCoordinates.length === 0) {
+          console.log("Game Over")
+        } else {
+          //Pick a random coordinate from all the open coordinates
+          const r = Math.floor(Math.random() * openCoordinates.length)
+          const blockGameObject = instantiate(new BlockGameObject(), coordinatesToPixels(openCoordinates[r]))
+          if (Math.random() > .5) {
+            blockGameObject.getComponent(TextLabel).text = "4"
+          }
+        }
+      }
+    }
+
+    /**
+     * Game object for the background tile objects
+     */
+    class BackgroundTileGameObject extends GameObject {
+      constructor() {
+        super("Background Tile Game Object")
+        this.addComponent(new Polygon, { points: [new Vector2(-50, -50), new Vector2(-50, 50), new Vector2(50, 50), new Vector2(50, -50)], fillStyle: "gray", strokeStyle: "black" })
+      }
+    }
+
+    Engine.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>
