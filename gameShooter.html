@@ -1,0 +1,248 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Game Shooter</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+  <script src="./engine/Mathf.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+  <script src="./engine/components/Camera.js"></script>
+
+
+
+
+
+  <script>
+
+    const square = [new Vector2(-10, -10), new Vector2(-10, 10), new Vector2(0, 0), new Vector2(10, 10), new Vector2(10, -10), new Vector2(5, -5), new Vector2(0, -10), new Vector2(-5, -5)]
+    const spaceShip = [new Vector2(-8, -5), new Vector2(-10, 10), new Vector2(-6, 6), new Vector2(0, 8), new Vector2(6, 6), new Vector2(10, 10), new Vector2(8, -5), new Vector2(0, -18)]
+    const laser = [new Vector2(-1, -3), new Vector2(1, -3), new Vector2(1, 3), new Vector2(-1, 3)]
+    const star = [new Vector2(-1, 0), new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1)]
+
+    class MainScene extends Scene {
+      constructor() {
+        super("#333")
+        this.instantiate(new HeroGameObject(), new Vector2(0, 0))
+
+        const controller = this.instantiate(new GameObject("Empty Controller"))
+        controller.addComponent(new Controller())
+      }
+    }
+
+
+    //Game Objects
+
+    class EnemyGameObject extends GameObject {
+      constructor() {
+        super("Enemy Game Object", {layer:"foreground"})
+        this.addComponent(new Polygon(), { points: square, fillStyle: "blue" })
+        this.addComponent(new Collider())
+        this.addComponent(new RigidBody())
+        this.addComponent(new EnemyController())
+      }
+    }
+
+    class HeroLaserGameObject extends GameObject {
+      constructor() {
+        super("Hero Laser Game Object", {layer:"foreground"})
+        this.addComponent(new Polygon(), { points: laser, fillStyle: "yellow" })
+        this.addComponent(new Collider(), { isTrigger: true })
+        this.addComponent(new HeroLaserGameController())
+      }
+    }
+
+    class EnemyLaserGameObject extends GameObject {
+      constructor() {
+        super("Enemy Laser Game Object", {layer:"foreground"})
+        this.addComponent(new Polygon(), { points: laser, fillStyle: "lightblue" })
+        this.addComponent(new Collider(), { isTrigger: true })
+        this.addComponent(new EnemyLaserController())
+      }
+    }
+
+
+    class HeroGameObject extends GameObject {
+      constructor() {
+        super("Hero Game Object", {layer:"foreground"})
+        this.addComponent(new Polygon(), { points: spaceShip, fillStyle: "red" })
+        this.addComponent(new Collider())
+        this.addComponent(new RigidBody())
+        this.addComponent(new HeroController())
+      }
+    }
+
+    class StarGameObject extends GameObject{
+      constructor(){
+        super("Star Game Object", {layer: "default"})
+        this.addComponent(new Polygon(), {points: star, fillStyle: "white"})
+        this.addComponent(new StarController())
+      }
+    }
+
+
+    //Controllers
+
+    class StarController extends Component{
+      speed = 50
+      start(){
+        this.speed = Math.random()*20 + 30
+      }
+      update(){
+        this.transform.position.plusEquals(new Vector2(0, Time.deltaTime * this.speed))
+        if(this.transform.position.y > 200)
+          this.gameObject.destroy()
+      }
+    }
+
+    class HeroLaserGameController extends Component {
+      update() {
+        this.transform.position.plusEquals(new Vector2(0, Time.deltaTime * - 300))
+        if(this.transform.position.y < -300)
+          this.gameObject.destroy()
+      }
+      onTriggerEnter(other, mtv){
+        if(other.name == "Enemy Game Object"){
+          other.destroy()
+        }
+      }
+    }
+
+    class EnemyLaserController extends Component {
+      update() {
+        this.transform.position.plusEquals(new Vector2(0, Time.deltaTime * 100))
+        if(this.transform.position.y > 100)
+          this.gameObject.destroy()
+      }
+      onTriggerEnter(other, mtv){
+        if(other.name == "Hero Game Object"){
+          SceneManager.loadScene(MainScene)
+        }
+      }
+    }
+
+
+
+    class Controller extends Component {
+      nextEnemy = Time.time
+      enemyInterval = 2
+      nextStar = Time.time
+      starInterval = .1
+
+      start(){
+        //Prepopulate Stars
+        for(let i = 0; i < 200; i++){
+          instantiate(new StarGameObject(), new Vector2((Math.random()*2-1)*400, (Math.random()*2-1)*400))
+        }
+      }
+      update() {
+        if (Time.time > this.nextEnemy) {
+          this.nextEnemy = Time.time + this.enemyInterval
+          instantiate(new EnemyGameObject, new Vector2((Math.random()*2-1)*300, -200))
+        }
+        if (Time.time > this.nextStar) {
+          this.nextStar = Time.time + this.starInterval
+          instantiate(new StarGameObject(), new Vector2((Math.random()*2-1)*400, -300))
+        }
+      }
+    }
+
+    class EnemyController extends Component {
+      nextFire = Time.time
+      fireInterval = 3
+
+      directionRight = true
+      nextDirectionSwitch = Time.time
+      directionSwitchInterval = 1
+      speed = 15
+      update() {
+
+        if (Time.time > this.nextFire) {
+          this.nextFire = Time.time + this.fireInterval
+          instantiate(new EnemyLaserGameObject, this.transform.position.clone())
+        }
+
+        if(this.directionRight){
+          this.transform.position.plusEquals(new Vector2(Time.deltaTime * this.speed, 0))
+        }
+        else{
+          this.transform.position.plusEquals(new Vector2(Time.deltaTime * -this.speed, 0))
+        }
+
+        if(this.nextDirectionSwitch < Time.time){
+          this.directionRight = !this.directionRight
+          this.nextDirectionSwitch = Time.time + this.directionSwitchInterval
+        }
+
+
+      }
+    }
+
+
+    class HeroController extends Component {
+      speed = 200
+      nextFire = Time.time
+      fireInterval = .25
+      start() {
+        Camera.main.transform.position = new Vector2(0, -100)
+
+        
+
+      }
+      update() {
+        if (Time.time > this.nextFire) {
+          this.nextFire = Time.time + this.fireInterval
+          instantiate(new HeroLaserGameObject, this.transform.position.clone().add(new Vector2(-6, -10)))
+          instantiate(new HeroLaserGameObject, this.transform.position.clone().add(new Vector2(6, -10)))
+        }
+      }
+      fixedUpdate() {
+        let offset = new Vector2(0, 0)
+
+        if (Input.keysDown.includes("ArrowRight")) offset = offset.add(new Vector2(1, 0))
+        if (Input.keysDown.includes("ArrowLeft")) offset = offset.add(new Vector2(-1, 0))
+        if (Input.keysDown.includes("ArrowUp")) offset = offset.add(new Vector2(0, -1))
+        if (Input.keysDown.includes("ArrowDown")) offset = offset.add(new Vector2(0, 1))
+
+        let c = offset
+        let a = c.normalized()
+        let b = offset.times(Time.deltaTime * this.speed)
+
+        this.transform.position = this.transform.position.add(b)
+
+
+
+      }
+    }
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start({ aspectRatio: 2, cameraWidth: 750, layers:["foreground"] })
+  </script>
+</body>
+
+</html>

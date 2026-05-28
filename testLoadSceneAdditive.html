@@ -1,0 +1,85 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Trigger Events</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+
+
+
+  <script>
+    const square = [new Vector2(-50, -50), new Vector2(-50, 50), new Vector2(50, 50), new Vector2(50, -50)]
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+
+        const text = this.instantiate(new GameObject("Text"), new Vector2(100, 100))
+        text.addComponent(new TextLabel(), {text: "Level 1"})
+        text.addComponent(new Level1Controller())
+      }
+    }
+
+    class SecondScene extends Scene {
+      constructor() {
+        super()
+
+        const text = this.instantiate(new GameObject("Added Text"), new Vector2(100, 200))
+        text.addComponent(new TextLabel(), {text: "Added Scene", fillStyle:"red"})
+        
+      }
+    }
+
+    class Level1Controller extends Component{
+      start(){
+        this.sceneStart = Time.time
+        SceneManager.loadScene(SecondScene, true)
+      }
+      update(){
+        if(Input.keysDownThisFrame.includes("Escape")){
+          GameObject.find("Added Text").destroy()
+        }
+      }
+      
+    }
+
+    
+
+   
+
+
+
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>
