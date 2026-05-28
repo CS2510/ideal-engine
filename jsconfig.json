@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "noImplicitAny": false,
+        "experimentalDecorators": true,
+        "lib": [
+            "esnext",
+            "dom"
+        ],
+        "target":"esnext",
+    },
+    "exclude": [
+        "before"
+    ]
+}
