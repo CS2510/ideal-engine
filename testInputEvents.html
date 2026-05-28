@@ -1,0 +1,89 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Input Events</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+
+
+
+
+
+  <script>
+
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+
+        //Static text at the top
+        this.instantiate(new GameObject("Title Text"), new Vector2(20, 20)).addComponent(new TextLabel(), { text: "Test Input Events - Push keyboard keys, move the mouse, and mouse down to test events", fillStyle: "Red"})
+
+        //The dynamic text
+        this.instantiate(new GameObject("Keys Down Text"), new Vector2(20, 60)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Keys Down This Frame Text"), new Vector2(20, 100)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Keys Up This Frame Text"), new Vector2(20, 140)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Position Text"), new Vector2(20, 180)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Position Last Frame Text"), new Vector2(20, 220)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Position Delta Text"), new Vector2(20, 260)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Buttons Down Text"), new Vector2(20, 300)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Buttons Down This Frame Text"), new Vector2(20, 340)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Buttons Up This Text"), new Vector2(20, 380)).addComponent(new TextLabel())
+
+        //The invisible controller
+       this.instantiate(new GameObject("Controller")).addComponent(new Controller())
+      }
+    }
+
+    class Controller extends Component {
+      update() {
+        //Keys Down
+        GameObject.find("Keys Down Text").getComponent(TextLabel).text = "Keys Down: " + Input.keysDown
+        GameObject.find("Keys Down This Frame Text").getComponent(TextLabel).text = "Keys Down This Frame: " + Input.keysDownThisFrame
+        GameObject.find("Keys Up This Frame Text").getComponent(TextLabel).text =  "Keys Up This Frame: " + Input.keysUpThisFrame
+
+        //Mouse Position
+        if (Input.mousePosition)
+          GameObject.find("Mouse Position Text").getComponent(TextLabel).text = "Mouse Position: " + Input.mousePosition.x + ", " + Input.mousePosition.y
+        if (Input.mousePositionLastFrame)
+          GameObject.find("Mouse Position Last Frame Text").getComponent(TextLabel).text = "Mouse Position Last Frame: " + Input.mousePositionLastFrame.x + ", " + Input.mousePositionLastFrame.y
+        if (Input.mousePositionDelta)
+          GameObject.find("Mouse Position Delta Text").getComponent(TextLabel).text = "Mouse Position Delta: " + Input.mousePositionDelta.x + ", " + Input.mousePositionDelta.y
+
+        //Mouse Buttons Down
+        GameObject.find("Mouse Buttons Down Text").getComponent(TextLabel).text = "Mouse Buttons Down: " + Input.mouseButtonsDown
+        GameObject.find("Mouse Buttons Down This Frame Text").getComponent(TextLabel).text = "Mouse Buttons This Frame Down: " + Input.mouseButtonsDownThisFrame
+        GameObject.find("Mouse Buttons Up This Text").getComponent(TextLabel).text = "Mouse Buttons Up This Frame: " + Input.mouseButtonsUpThisFrame
+      }
+    }
+
+    Engine.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>
