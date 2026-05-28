@@ -1,0 +1,3 @@
+class RigidBody extends Component{
+    
+}
