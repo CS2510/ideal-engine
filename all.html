@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All HTML Pages Error Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --ok: #0f766e;
+      --error: #991b1b;
+      --error-bg: rgba(220, 38, 38, 0.92);
+      --border: #d1d5db;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, #eef3f8 0%, #f9fbfd 100%);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.4rem;
+    }
+
+    .summary {
+      margin-bottom: 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surface);
+      min-height: 320px;
+      box-shadow: 0 6px 18px rgba(31, 41, 51, 0.08);
+    }
+
+    .card-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      background: #fafbfc;
+    }
+
+    .path {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #111827;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ok);
+    }
+
+    .status.has-error {
+      color: var(--error);
+    }
+
+    iframe {
+      width: 100%;
+      height: 360px;
+      border: 0;
+      background: #fff;
+      display: block;
+    }
+
+    .error-banner {
+      position: absolute;
+      top: 44px;
+      left: 0;
+      right: 0;
+      padding: 10px 12px;
+      background: var(--error-bg);
+      color: #fff;
+      font-size: 0.85rem;
+      line-height: 1.35;
+      z-index: 2;
+      display: none;
+      white-space: pre-wrap;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+      font-family: Consolas, "Courier New", monospace;
+      max-height: 160px;
+      overflow: auto;
+    }
+
+    .error-banner.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>HTML Runtime Error Dashboard</h1>
+  <div class="summary" id="summary">Loading pages...</div>
+  <div class="grid" id="frameGrid"></div>
+
+  <script>
+    const htmlFiles = [
+      "games/game_cards.html",
+      "games/game_merge.html",
+      "games/game_top_down.html",
+      "games/main-game/index.html",
+      "games/platformer-game/index.html",
+      "test/test_input.html",
+    ];
+
+    const grid = document.getElementById("frameGrid");
+    const summary = document.getElementById("summary");
+
+    let totalErrors = 0;
+
+    function updateSummary() {
+      summary.textContent = `${htmlFiles.length} pages loaded. ${totalErrors > 0 ? `${totalErrors} page(s) reported runtime errors.` : "No runtime errors reported."}`;
+      summary.style.color = totalErrors > 0 ? "#991b1b" : "#0f766e";
+    }
+
+    function formatError(event, source) {
+      const parts = [];
+      const message = event?.message || event?.reason?.message || String(event?.reason || "Unknown runtime error");
+      parts.push(`[${source}] ${message}`);
+
+      if (event?.filename) {
+        const line = event.lineno || "?";
+        const col = event.colno || "?";
+        parts.push(`at ${event.filename}:${line}:${col}`);
+      }
+
+      if (event?.error?.stack) {
+        parts.push(event.error.stack);
+      } else if (event?.reason?.stack) {
+        parts.push(event.reason.stack);
+      }
+
+      return parts.join("\n");
+    }
+
+    function setError(card, text) {
+      const banner = card.querySelector(".error-banner");
+      const status = card.querySelector(".status");
+
+      if (!banner.classList.contains("visible")) {
+        totalErrors += 1;
+      }
+
+      banner.textContent = text;
+      banner.classList.add("visible");
+      status.textContent = "ERROR";
+      status.classList.add("has-error");
+      updateSummary();
+    }
+
+    function setLoaded(card) {
+      const status = card.querySelector(".status");
+      if (!status.classList.contains("has-error")) {
+        status.textContent = "OK";
+      }
+      updateSummary();
+    }
+
+    function buildFrameReporterSource(frameId, path) {
+      return `(function(){
+        function send(type, payload) {
+          parent.postMessage({ __iframeReporter: true, frameId: ${JSON.stringify(frameId)}, path: ${JSON.stringify(path)}, type: type, payload: payload }, "*");
+        }
+
+        window.addEventListener("error", function(evt) {
+          send("error", {
+            message: evt.message || "Unknown runtime error",
+            filename: evt.filename || "",
+            lineno: evt.lineno || 0,
+            colno: evt.colno || 0,
+            stack: evt.error && evt.error.stack ? String(evt.error.stack) : ""
+          });
+        }, true);
+
+        window.addEventListener("unhandledrejection", function(evt) {
+          var reason = evt.reason;
+          send("unhandledrejection", {
+            message: reason && reason.message ? String(reason.message) : String(reason || "Unhandled promise rejection"),
+            stack: reason && reason.stack ? String(reason.stack) : ""
+          });
+        });
+      })();`;
+    }
+
+    function injectReporterIntoHtml(html, frameId, path) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      if (!doc.head) {
+        const head = doc.createElement("head");
+        if (doc.documentElement.firstChild) {
+          doc.documentElement.insertBefore(head, doc.documentElement.firstChild);
+        } else {
+          doc.documentElement.appendChild(head);
+        }
+      }
+
+      const base = doc.createElement("base");
+      base.setAttribute("href", new URL(path, window.location.href).href);
+
+      const reporter = doc.createElement("script");
+      reporter.textContent = buildFrameReporterSource(frameId, path);
+
+      doc.head.prepend(reporter);
+      doc.head.prepend(base);
+
+      return `<!doctype html>\n${doc.documentElement.outerHTML}`;
+    }
+
+    function formatMessagePayload(data) {
+      const source = data.path || "iframe";
+      const payload = data.payload || {};
+      const lines = [`[${source}] ${payload.message || "Unknown runtime error"}`];
+
+      if (payload.filename) {
+        lines.push(`at ${payload.filename}:${payload.lineno || "?"}:${payload.colno || "?"}`);
+      }
+
+      if (payload.stack) {
+        lines.push(payload.stack);
+      }
+
+      return lines.join("\n");
+    }
+
+    async function loadFrame(iframe, card, path, frameId) {
+      try {
+        const response = await fetch(path, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        }
+
+        const html = await response.text();
+        iframe.srcdoc = injectReporterIntoHtml(html, frameId, path);
+      } catch (err) {
+        setError(card, `[load] Could not instrument ${path}: ${err.message || err}`);
+        iframe.src = path;
+      }
+
+      iframe.addEventListener("load", () => {
+        setLoaded(card);
+      });
+
+      iframe.addEventListener("error", () => {
+        setError(card, `[load] Failed to load iframe for ${path}.`);
+      });
+    }
+
+    const cardByFrameId = new Map();
+
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || data.__iframeReporter !== true || !data.frameId) {
+        return;
+      }
+
+      const card = cardByFrameId.get(data.frameId);
+      if (!card) {
+        return;
+      }
+
+      setError(card, formatMessagePayload(data));
+    });
+
+    for (let i = 0; i < htmlFiles.length; i += 1) {
+      const path = htmlFiles[i];
+      const frameId = `frame-${i}`;
+      const card = document.createElement("section");
+      card.className = "card";
+
+      const header = document.createElement("div");
+      header.className = "card-header";
+
+      const pathLabel = document.createElement("div");
+      pathLabel.className = "path";
+      pathLabel.textContent = path;
+
+      const status = document.createElement("div");
+      status.className = "status";
+      status.textContent = "LOADING";
+
+      const banner = document.createElement("div");
+      banner.className = "error-banner";
+
+      const iframe = document.createElement("iframe");
+      iframe.loading = "lazy";
+      iframe.title = `Preview for ${path}`;
+      iframe.dataset.frameId = frameId;
+
+      header.appendChild(pathLabel);
+      header.appendChild(status);
+      card.appendChild(header);
+      card.appendChild(banner);
+      card.appendChild(iframe);
+      grid.appendChild(card);
+
+      cardByFrameId.set(frameId, card);
+      loadFrame(iframe, card, path, frameId);
+    }
+
+    updateSummary();
+  </script>
+</body>
+</html>
