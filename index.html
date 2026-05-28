@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Day 01</title>
+        <style>
+            *{
+                margin:0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canv"></canvas>
+        <script>
+            // let age = 83
+            // const wealth = 60000
+
+            const canvas = document.querySelector("#canv")
+            const ctx = canvas.getContext("2d")
+
+            ctx.beginPath()
+            ctx.moveTo(110,90)
+            ctx.lineTo(145, 100)
+            ctx.lineTo(145, 90)
+            ctx.lineTo(155, 90)
+            ctx.lineTo(155, 100)
+            ctx.lineTo(190, 90)
+            ctx.lineTo(200, 140)
+            ctx.lineTo(175, 150)
+            ctx.lineTo(150, 140)
+            ctx.lineTo(125, 150)
+            ctx.lineTo(100, 140)
+            ctx.lineTo(110, 90)
+
+
+            ctx.lineWidth = 5
+            ctx.strokeStyle = "purple"
+            ctx.strokeStyle = "rgb(255,150, 0)"
+            ctx.strokeStyle = "#FF9000"
+            ctx.strokeStyle = "rgba(255,150, 0, .5)"
+            ctx.strokeStyle = "#FF900088"
+            ctx.stroke()
+            
+            ctx.fillStyle = "yellow"
+            ctx.fill()
+        </script>
+    </body>
+</html>
