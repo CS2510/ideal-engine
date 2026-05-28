@@ -1,0 +1,108 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Rigid Body Acceleration</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+
+
+
+  <script>
+    class MainScene extends Scene {
+      constructor() {
+        super()
+        this.instantiate(new GameObject("Gravity Game Object"), new Vector2(100, 100)).addComponent(new TextLabel(), { text: "Constant Gravity" })
+        this.instantiate(new GameObject("TerminalVelocity Game Object"), new Vector2(300, 100)).addComponent(new TextLabel(), { text: "Terminal Velocity" })
+        this.instantiate(new GameObject("Impulse Game Object"), new Vector2(500, 100)).addComponent(new TextLabel(), { text: "Impulse Acceleration" })
+        this.instantiate(new GameObject("Nothing Game Object"), new Vector2(700, 100)).addComponent(new TextLabel(), { text: "No Velocity" })
+        this.instantiate(new GameObject("Push Space Game Object"), new Vector2(300, 50)).addComponent(new TextLabel(), { text: "Push Space to give all objects an upward impulse acceleration"})
+
+        this.instantiate(new MovingGameObject(), new Vector2(150, 200)).addComponent(new Controller1())
+        this.instantiate(new MovingGameObject(), new Vector2(350, 200)).addComponent(new Controller2())
+        this.instantiate(new MovingGameObject(), new Vector2(550, 200)).addComponent(new Controller3())
+        this.instantiate(new MovingGameObject(), new Vector2(750, 200)).addComponent(new Controller4())
+
+      }
+    }
+
+    class MovingGameObject extends GameObject {
+      constructor() {
+        super("Moving Game Object")
+        this.addComponent(new Polygon(), { points: [new Vector2(-50, -50), new Vector2(-50, 50), new Vector2(50, 50), new Vector2(50, -50)] })
+        this.addComponent(new RigidBody())
+      }
+    }
+
+    class Controller1 extends Component {
+      start() {
+        this.gameObject.getComponent(RigidBody).gravity = new Vector2(0, 32)
+      }
+    }
+
+    class Controller2 extends Component {
+      start() {
+        this.gameObject.getComponent(RigidBody).gravity = new Vector2(0, 32)
+      }
+      update(){
+        const rigidBody = this.gameObject.getComponent(RigidBody)
+
+        //Enforce a terminal velocity
+        if(rigidBody.velocity.y > 10)
+          rigidBody.velocity.y = 10
+      }
+    }
+
+    class Controller3 extends Component {
+      start() {
+        this.gameObject.getComponent(RigidBody).acceleration = new Vector2(0, 1000 )
+      }
+
+    }
+
+    class Controller4 extends Component {
+      start() {
+      }
+      update(){
+        if(Input.keysUpThisFrame.includes("Space")){
+          const movingGameObjects = Engine.currentScene.gameObjects.filter(go=>go.getComponent(RigidBody))
+          for(const movingGameObject of movingGameObjects){
+            movingGameObject.getComponent(RigidBody).acceleration = new Vector2(0, -2000)
+          }
+        }
+      }
+    }
+
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>

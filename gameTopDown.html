@@ -1,0 +1,112 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Game Top Down</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+
+
+
+
+
+  <script>
+
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+        this.instantiate(new HorizontalWallGameObject(), new Vector2(200, 200))
+        this.instantiate(new HorizontalWallGameObject(), new Vector2(400, 200))
+
+        this.instantiate(new HorizontalWallGameObject(), new Vector2(200, 600))
+
+
+        this.instantiate(new VerticalWallGameObject(), new Vector2(100, 300))
+        this.instantiate(new VerticalWallGameObject(), new Vector2(100, 500))
+
+        this.instantiate(new VerticalWallGameObject(), new Vector2(500, 300))
+        this.instantiate(new VerticalWallGameObject(), new Vector2(500, 500))
+
+        this.instantiate(new HeroGameObject(), new Vector2(400, 300))
+
+      }
+    }
+
+    class HorizontalWallGameObject extends GameObject {
+      constructor() {
+        super("HorizontalWallGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-100, -10), new Vector2(100, -10), new Vector2(100, 10), new Vector2(-100, 10)] })
+        this.addComponent(new Collider(), {customPoints: [new Vector2(-100, 0), new Vector2(100, 0)]})
+      }
+    }
+
+    class VerticalWallGameObject extends GameObject {
+      constructor() {
+        super("VerticalWallGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-10, -100), new Vector2(10, -100), new Vector2(10, 100), new Vector2(-10, 100)] })
+        this.addComponent(new Collider(), {customPoints: [new Vector2(-10, -100), new Vector2(-10, 100), new Vector2(10, -100), new Vector2(10, 100)]})
+      }
+    }
+
+    class HeroGameObject extends GameObject {
+      constructor() {
+        super("HeroGameObject")
+        this.addComponent(new Polygon(), { points: [new Vector2(-10, -10), new Vector2(10, -10), new Vector2(10, 10), new Vector2(-10, 10)], fillStyle: "red" })
+        this.addComponent(new Collider())
+        this.addComponent(new RigidBody())
+        this.addComponent(new HeroController())
+      }
+    }
+
+    class HeroController extends Component{
+      speed = 100
+      fixedUpdate(){
+        let offset = new Vector2(0,0)
+        if(Input.keysDown.includes("ArrowRight")) offset = offset.add(new Vector2(1, 0))
+        if(Input.keysDown.includes("ArrowLeft")) offset = offset.add(new Vector2(-1, 0))
+        if(Input.keysDown.includes("ArrowUp")) offset = offset.add(new Vector2(0, -1))
+        if(Input.keysDown.includes("ArrowDown")) offset = offset.add(new Vector2(0, 1))
+        let c = offset
+        let a = c.normalized()
+        let b = offset.times(Time.deltaTime * this.speed)
+        if(b.magnitude != 0)
+          console.log("Move")
+        if(Number.isNaN(b.x))
+          console.log("NaN")
+        this.transform.position = this.transform.position.add(b)
+      }
+    }
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>
