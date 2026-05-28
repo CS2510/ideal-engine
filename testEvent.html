@@ -1,0 +1,111 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Events</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/Events.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+
+  <script>
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+
+        const button1GameObject = this.instantiate(new ButtonGameObject(), new Vector2(200, 100))
+        const button2GameObject = this.instantiate(new ButtonGameObject(), new Vector2(200, 300))
+
+        button1GameObject.addComponent(new Button1Controller())
+        button2GameObject.addComponent(new Button2Controller())
+
+        const controllerGameObject = this.instantiate(new GameObject("Controller Game Object"), new Vector2(500, 200))
+        controllerGameObject.addComponent(new TextLabel())
+        controllerGameObject.addComponent(new Controller())
+      }
+    }
+
+    class ButtonGameObject extends GameObject{
+      constructor(){
+        super("Button Game Object")
+        this.addComponent(new Polygon(), {points: [new Vector2(-100, -50), new Vector2(-100, 50), new Vector2(100, 50), new Vector2(100, -50)], fillStyle: "cyan"})
+        this.addComponent(new TextLabel(), {text: "Button"})
+        this.addComponent(new Collider())
+      }
+    }
+
+    class Button1Controller extends Component{
+      start(){
+        this.gameObject.getComponent(TextLabel).text = "Button 1"
+      }
+      update(){
+        
+      }
+      onMouseUpAsButton(){
+        Events.handleEvent("button1", [])
+
+      }
+      
+    }
+    
+    class Button2Controller extends Component{
+      start(){
+        this.gameObject.getComponent(TextLabel).text = "Button 2"
+        this.gameObject.getComponent(Polygon).fillStyle = "pink"
+      }
+      update(){
+        
+      }
+
+      onMouseUpAsButton(){
+        Events.handleEvent("button2", [])
+
+      }
+      
+    }
+    
+    class Controller extends Component{
+      start(){
+        this.gameObject.getComponent(TextLabel).text = "Waiting for events"
+        Events.registerListener("button1", this)
+        Events.registerListener("button2", this)
+      }
+      update(){
+
+      }
+      handleEvent(message, args){
+        this.gameObject.getComponent(TextLabel).text = message
+      }
+    }
+
+
+    Engine.currentScene = new MainScene()
+    Engine.start()
+  </script>
+</body>
+
+</html>
