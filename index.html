@@ -1,0 +1,57 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+    <title>Day 09</title>
+    <style>
+        /* Engine-Specific */
+        * {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canv"></canvas>
+    <script src="./engine/Engine.js"></script>
+    <script src="./engine/Scene.js"></script>
+    <script src="./engine/GameObject.js"></script>
+    <script src="./engine/Component.js"></script>
+    <script src="./engine/Input.js"></script>
+    <script src="./engine/Vector2.js"></script>
+    <script src="./engine/Time.js"></script>
+    <script src="./engine/Collisions.js"></script>
+    
+    <script src="./engine/components/Transform.js"></script>
+    <script src="./engine/components/TextLabel.js"></script>
+    <script src="./engine/components/Polygon.js"></script>
+    <script src="./engine/components/Collider.js"></script>
+    
+    
+    <script src="./game/MainScene.js"></script>
+    <script src="./game/BatSymbolGameObject.js"></script>
+    <script src="./game/BatSymbolComponent.js"></script>
+
+    <script src="./game/TriangleComponent.js"></script>
+    <script src="./game/TriangleGameObject.js"></script>
+    
+    <script src="./game/LaserComponent.js"></script>
+    <script src="./game/LaserGameObject.js"></script>
+    
+    <script src="./game/PointsComponent.js"></script>
+    <script src="./game/PointsGameObject.js"></script>
+    
+    <script src="./game/Globals.js"></script>
+    
+
+
+    <script>
+        Engine.currentScene = new MainScene()
+        Engine.start()
+    </script>
+</body>
+
+</html>

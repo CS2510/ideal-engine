@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "lib": [
+            "esnext",
+            "dom"
+        ],
+        "target":"esnext",
+    },
+    "exclude": [
+        "before"
+    ]
+}
