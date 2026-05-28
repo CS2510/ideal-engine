@@ -17,14 +17,20 @@ You are allowed to transcribe the provided code as a learning tool, but you must
 
 You may not copy in any way (including by transcription) any of the documentation or comments in this code. This allows you to further engage with the code if you choose to transcribe it.
 
+## Rule 3: Text Exceptions
+
+You can copy any code in the 'tests' folder if one exists. This will allow you to test your code without having to transcribe lengthy test scripts.
+
 ## Summary
 
-The only way to use this code without violating academic integrity is to manually transcribe the code, except the comments.
+The only way to use this code without violating academic integrity is to manually transcribe the code (except the comments). The only exception is code in the 'tests' folder.
 
 ✅ Manually transcribing the code but not the comments
 
-❌ Electronic copying any amount of the contents
+✅ Adding your own comments to any part of your code
+
+❌ Electronic copying anything not in the tests folder
 
 ❌ Electronic copying with intent to transcribe later
 
-❌ Manually transcribing the code and comments
+❌ Manually transcribing the comments with in the code.
