@@ -16,25 +16,22 @@
 
 <body>
   <canvas id="canv"></canvas>
-  <script src="../engine/Engine.js"></script>
-  <script src="../engine/Scene.js"></script>
-  <script src="../engine/GameObject.js"></script>
-  <script src="../engine/Component.js"></script>
-  <script src="../engine/Input.js"></script>
-  <script src="../engine/Vector2.js"></script>
-  <script src="../engine/Time.js"></script>
-  <script src="../engine/Collisions.js"></script>
-  <script src="../engine/SceneManager.js"></script>
+  <script type="module">
+    import "../engine/Engine.js"
+    import "../engine/Scene.js"
+    import "../engine/GameObject.js"
+    import "../engine/Component.js"
+    import "../engine/Input.js"
+    import "../engine/Vector2.js"
+    import "../engine/Time.js"
+    import "../engine/Collisions.js"
+    import "../engine/SceneManager.js"
 
-  <script src="../engine/components/Transform.js"></script>
-  <script src="../engine/components/TextLabel.js"></script>
-  <script src="../engine/components/Polygon.js"></script>
-  <script src="../engine/components/Collider.js"></script>
-  <script src="../engine/components/RigidBody.js"></script>
-
-
-
-  <script>
+    import "../engine/components/Transform.js"
+    import "../engine/components/TextLabel.js"
+    import "../engine/components/Polygon.js"
+    import "../engine/components/Collider.js"
+    import "../engine/components/RigidBody.js"
     class MainScene extends Scene {
       constructor() {
         super()
@@ -91,7 +88,7 @@
       }
       update(){
         if(Input.keysUpThisFrame.includes("Space")){
-          const movingGameObjects = Engine.currentScene.gameObjects.filter(go=>go.getComponent(RigidBody))
+          const movingGameObjects = SceneManager.currentScene.gameObjects.filter(go=>go.getComponent(RigidBody))
           for(const movingGameObject of movingGameObjects){
             movingGameObject.getComponent(RigidBody).acceleration = new Vector2(0, -2000)
           }

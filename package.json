@@ -1,0 +1,12 @@
+{
+  "name": "ideal-engine",
+  "version": "1.0.0",
+  "description": "A simple 2D game engine",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,19 +1,22 @@
 // Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project.
-class LaserComponent extends Component{
-    start(){
-        // console.log("Start")
+import { Component } from "../../engine/Component.js";
+import { Time } from "../../engine/Time.js";
+import { GameObject } from "../../engine/GameObject.js";
+import { PointsComponent } from "./PointsComponent.js";
+export class LaserComponent extends Component {
+    start() {
+        // intentionally empty
     }
-    update(){
-        // console.log("Update")
-        this.transform.position.y -= Time.deltaTime * 40
-
-        if(this.transform.position.y < 50){
-            this.gameObject.destroy()
-            //Globals.points++
-            GameObject.find("Points Game Object").getComponent(PointsComponent).points++
+    update() {
+        this.transform.position.y -= Time.deltaTime * 40;
+        if (this.transform.position.y < 50) {
+            this.gameObject.destroy();
+            const pointsComp = GameObject.find("Points Game Object")?.getComponent(PointsComponent);
+            if (pointsComp)
+                pointsComp.points++;
         }
     }
-    onDestroy(){
-        // console.log("Destroy")
+    onDestroy() {
+        // intentionally empty
     }
 }

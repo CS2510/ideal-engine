@@ -16,29 +16,37 @@
 
 <body>
   <canvas id="canv"></canvas>
-  <script src="../../engine/Engine.js"></script>
-  <script src="../../engine/Scene.js"></script>
-  <script src="../../engine/GameObject.js"></script>
-  <script src="../../engine/Component.js"></script>
-  <script src="../../engine/Input.js"></script>
-  <script src="../../engine/Vector2.js"></script>
-  <script src="../../engine/Time.js"></script>
-  <script src="../../engine/Collisions.js"></script>
-  <script src="../../engine/SceneManager.js"></script>
-  <script src="../../engine/Mathf.js"></script>
+  <script type="module" src="./Main.js"></script>
+  <!-- Legacy inline script preserved below for reference
+  <script type="module">
+    import "../../engine/Engine.js"
+    import "../../engine/Scene.js"
+    import "../../engine/GameObject.js"
+    import "../../engine/Component.js"
+    import "../../engine/Input.js"
+    import "../../engine/Vector2.js"
+    import "../../engine/Time.js"
+    import "../../engine/Collisions.js"
+    import "../../engine/SceneManager.js"
+    import "../../engine/Mathf.js"
 
-  <script src="../../engine/components/Transform.js"></script>
-  <script src="../../engine/components/TextLabel.js"></script>
-  <script src="../../engine/components/Polygon.js"></script>
-  <script src="../../engine/components/Collider.js"></script>
-  <script src="../../engine/components/RigidBody.js"></script>
-  <script src="../../engine/components/Camera.js"></script>
+    import "../../engine/components/Transform.js"
+    import "../../engine/components/TextLabel.js"
+    import "../../engine/components/Polygon.js"
+    import "../../engine/components/Collider.js"
+    import "../../engine/components/RigidBody.js"
+    import "../../engine/components/Camera.js"
 
-
-
-
-
-  <script>
+    import "./MainScene.js"
+    import "./BatSymbolGameObject.js"
+    import "./BatSymbolComponent.js"
+    import "./TriangleComponent.js"
+    import "./TriangleGameObject.js"
+    import "./LaserComponent.js"
+    import "./LaserGameObject.js"
+    import "./PointsComponent.js"
+    import "./PointsGameObject.js"
+    import "./Globals.js"
 
     const square = [new Vector2(-10, -10), new Vector2(10, -10), new Vector2(10, 10), new Vector2(-10, 10)]
 
@@ -167,6 +175,7 @@
     SceneManager.currentScene = new MainScene()
     Engine.start({ aspectRatio: 2, cameraWidth : 1000})
   </script>
+  -->
 </body>
 
 </html>
