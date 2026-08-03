@@ -1,0 +1,118 @@
+<!-- Please carefully review the rules about academic integrity found in the academicIntegrity.md file found at the root of this project. -->
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Test Mouse Events</title>
+  <style>
+    /* Engine-Specific */
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canv"></canvas>
+  <script src="./engine/Engine.js"></script>
+  <script src="./engine/Scene.js"></script>
+  <script src="./engine/GameObject.js"></script>
+  <script src="./engine/Component.js"></script>
+  <script src="./engine/Input.js"></script>
+  <script src="./engine/Vector2.js"></script>
+  <script src="./engine/Time.js"></script>
+  <script src="./engine/Collisions.js"></script>
+  <script src="./engine/SceneManager.js"></script>
+
+  <script src="./engine/components/Transform.js"></script>
+  <script src="./engine/components/TextLabel.js"></script>
+  <script src="./engine/components/Polygon.js"></script>
+  <script src="./engine/components/Collider.js"></script>
+  <script src="./engine/components/RigidBody.js"></script>
+
+  <script>
+
+
+    class MainScene extends Scene {
+      constructor() {
+        super()
+
+        //Static text at the top
+        this.instantiate(new GameObject("Title Text Game Object"), new Vector2(20, 20)).addComponent(new TextLabel(), { text: "Button Test - Mouse over, click, and drag button to test events", fillStyle: "Red"})
+
+        //The main button
+        const mainButton = this.instantiate(new GameObject("Main Button Game Object", {layer:"foreground"}), new Vector2(400, 200))
+        mainButton.addComponent(new Polygon, {points: [new Vector2(-50, -20), new Vector2(-50, 20), new Vector2(50, 20), new Vector2(50, -20)], fillStyle:"red", strokeStyle: "blue"})
+        mainButton.addComponent(new Collider())
+        mainButton.addComponent(new ButtonController())
+
+        const otherButton = this.instantiate(new GameObject("Other Button Game Object", {layer:"background"}), new Vector2(420, 220))
+        otherButton.addComponent(new Polygon, {points: [new Vector2(-50, -20), new Vector2(-50, 20), new Vector2(50, 20), new Vector2(50, -20)], fillStyle:"yellow", strokeStyle: "purple"})
+
+        //The dynamic text
+        this.instantiate(new GameObject("Mouse Enter Text"), new Vector2(20, 60)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Over Text"), new Vector2(20, 100)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Exit Text"), new Vector2(20, 140)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Down Text"), new Vector2(20, 180)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Up Text"), new Vector2(20, 220)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Up as Button Text"), new Vector2(20, 260)).addComponent(new TextLabel())
+        this.instantiate(new GameObject("Mouse Drag Text"), new Vector2(20, 300)).addComponent(new TextLabel())
+        
+      }
+    }
+
+    
+
+    class ButtonController extends Component{
+      frames = 0
+      update(){
+        if(this.frames%3==0){
+        GameObject.find("Mouse Enter Text").getComponent(TextLabel).text = GameObject.find("Mouse Enter Text").getComponent(TextLabel).text.slice(0, -1)
+        GameObject.find("Mouse Over Text").getComponent(TextLabel).text = GameObject.find("Mouse Over Text").getComponent(TextLabel).text.slice(0, -1)
+        GameObject.find("Mouse Exit Text").getComponent(TextLabel).text = GameObject.find("Mouse Exit Text").getComponent(TextLabel).text.slice(0, -1)
+        GameObject.find("Mouse Down Text").getComponent(TextLabel).text = GameObject.find("Mouse Down Text").getComponent(TextLabel).text.slice(0, -1)
+        GameObject.find("Mouse Up Text").getComponent(TextLabel).text = GameObject.find("Mouse Up Text").getComponent(TextLabel).text.slice(0, -1)
+        GameObject.find("Mouse Up as Button Text").getComponent(TextLabel).text = GameObject.find("Mouse Up as Button Text").getComponent(TextLabel).text.slice(0, -1)
+        GameObject.find("Mouse Drag Text").getComponent(TextLabel).text = GameObject.find("Mouse Drag Text").getComponent(TextLabel).text.slice(0, -1)
+        }
+        this.frames++
+      }
+      onMouseEnter(){
+        console.log("Mouse Enter")
+        GameObject.find("Mouse Enter Text").getComponent(TextLabel).text = "Mouse Enter"
+      }
+      onMouseOver(){
+        console.log("Mouse Over")
+        GameObject.find("Mouse Over Text").getComponent(TextLabel).text = "Mouse Over"
+      }
+      onMouseExit(){
+        console.log("Mouse Exit")
+        GameObject.find("Mouse Exit Text").getComponent(TextLabel).text = "Mouse Exit"
+      }
+      onMouseDown(){
+        console.log("Mouse Down")
+        GameObject.find("Mouse Down Text").getComponent(TextLabel).text = "Mouse Down"
+      }
+      onMouseUp(){
+        console.log("Mouse Up")
+        GameObject.find("Mouse Up Text").getComponent(TextLabel).text = "Mouse Up"
+      }
+      onMouseUpAsButton(){
+        console.log("Mouse Up as Button")
+        GameObject.find("Mouse Up as Button Text").getComponent(TextLabel).text = "Mouse Up as Button"
+      }
+      onMouseDrag(){
+        console.log("Mouse Drag")
+        GameObject.find("Mouse Drag Text").getComponent(TextLabel).text = "Mouse Drag"
+        this.transform.position = this.transform.position.add(Input.mousePositionDelta)
+      }
+    }
+
+    SceneManager.currentScene = new MainScene()
+    Engine.start({layers: ["background", "foreground"]})
+  </script>
+</body>
+
+</html>
