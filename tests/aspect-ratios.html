@@ -4,7 +4,7 @@
 <html>
 
 <head>
-  <title>Test Camera</title>
+  <title>Test Aspect Ratios</title>
   <style>
     /* Engine-Specific */
     * {
@@ -16,23 +16,23 @@
 
 <body>
   <canvas id="canv"></canvas>
-  <script src="./engine/Engine.js"></script>
-  <script src="./engine/Scene.js"></script>
-  <script src="./engine/GameObject.js"></script>
-  <script src="./engine/Component.js"></script>
-  <script src="./engine/Input.js"></script>
-  <script src="./engine/Vector2.js"></script>
-  <script src="./engine/Time.js"></script>
-  <script src="./engine/Collisions.js"></script>
-  <script src="./engine/SceneManager.js"></script>
-  <script src="./engine/Mathf.js"></script>
+  <script src="../engine/Engine.js"></script>
+  <script src="../engine/Scene.js"></script>
+  <script src="../engine/GameObject.js"></script>
+  <script src="../engine/Component.js"></script>
+  <script src="../engine/Input.js"></script>
+  <script src="../engine/Vector2.js"></script>
+  <script src="../engine/Time.js"></script>
+  <script src="../engine/Collisions.js"></script>
+  <script src="../engine/SceneManager.js"></script>
+  <script src="../engine/Mathf.js"></script>
 
-  <script src="./engine/components/Transform.js"></script>
-  <script src="./engine/components/TextLabel.js"></script>
-  <script src="./engine/components/Polygon.js"></script>
-  <script src="./engine/components/Collider.js"></script>
-  <script src="./engine/components/RigidBody.js"></script>
-  <script src="./engine/components/Camera.js"></script>
+  <script src="../engine/components/Transform.js"></script>
+  <script src="../engine/components/TextLabel.js"></script>
+  <script src="../engine/components/Polygon.js"></script>
+  <script src="../engine/components/Collider.js"></script>
+  <script src="../engine/components/RigidBody.js"></script>
+  <script src="../engine/components/Camera.js"></script>
 
 
 
@@ -40,6 +40,7 @@
 
   <script>
 
+    const square = [new Vector2(-10, -10), new Vector2(10, -10), new Vector2(10, 10), new Vector2(-10, 10)]
 
     class MainScene extends Scene {
       constructor() {
@@ -64,6 +65,11 @@
         const label = this.instantiate(new GameObject("Label Game Object", { layer: "UI" }), new Vector2(50, 10))
         label.addComponent(new TextLabel(), { text: "Hero" })
 
+        const button = this.instantiate(new GameObject("Button Game Object", {layer: "UI"}), new Vector2(100, 100));
+        button.addComponent(new Polygon(), {points: square, fillStyle: "blue"})
+        button.addComponent(new Collider())
+        button.addComponent(new ButtonComponent())
+
       }
     }
 
@@ -86,10 +92,16 @@
     class HeroGameObject extends GameObject {
       constructor() {
         super("HeroGameObject")
-        this.addComponent(new Polygon(), { points: [new Vector2(-10, -10), new Vector2(10, -10), new Vector2(10, 10), new Vector2(-10, 10)], fillStyle: "red" })
+        this.addComponent(new Polygon(), { points: square, fillStyle: "red" })
         this.addComponent(new Collider())
         this.addComponent(new RigidBody())
         this.addComponent(new HeroController())
+      }
+    }
+
+    class ButtonComponent extends Component{
+      onMouseOver(){
+        console.log("Over Button")
       }
     }
 
@@ -97,7 +109,7 @@
       speed = 100
       onMouseOver() {
 
-        
+
 
         console.log("Mouse Over")
       }
@@ -116,44 +128,25 @@
         this.transform.position = this.transform.position.add(b)
 
 
-        if(Camera.main.transform.position.x - this.transform.position.x> 25){
+        if (Camera.main.transform.position.x - this.transform.position.x > 25) {
           Camera.main.transform.position.x = this.transform.position.x + 25
         }
-        if(Camera.main.transform.position.x - this.transform.position.x< -25){
+        if (Camera.main.transform.position.x - this.transform.position.x < -25) {
           Camera.main.transform.position.x = this.transform.position.x - 25
         }
         Camera.main.transform.position.y = this.transform.position.y
 
-        Camera.main.transform.scale = new Vector2(.5, .5)
+        Camera.main.transform.scale = new Vector2(1, 1)
 
 
 
 
-        Camera.main.transform.position.x = Mathf.clamp(Camera.main.transform.position.x, 100, 300)
-
-        
-        // Camera.main.transform.scale = new Vector2(.5, .5)
-        
-
-        // const p = this.transform.position
-        // const cp = Camera.main.transform.position
-        // const q = 100
-        // if (p.x - cp.x > q) cp.x = Mathf.lerp(p.x - q, cp.x, .9)
-        // if (p.x - cp.x < -q) cp.x = Mathf.lerp(p.x + q, cp.x, .9)
-
-        // if (p.y - cp.y > q) cp.y = Mathf.lerp(p.y - q, cp.y, .9)
-        // if (p.y - cp.y < -q) cp.y = Mathf.lerp(p.y + q, cp.y, .9)
-
-        // const labelGameObject = GameObject.find("Label Game Object")
-
-
-        // labelGameObject.transform.position = Camera.worldPointToScreenPoint(this.transform.position)
-        // labelGameObject.transform.position.y -= 20
+        Camera.main.transform.position.x = Mathf.clamp(Camera.main.transform.position.x, 0, 600)
       }
     }
 
     SceneManager.currentScene = new MainScene()
-    Engine.start()
+    Engine.start({ aspectRatio: 2})
   </script>
 </body>
 
